@@ -122,6 +122,11 @@ git clone github网址.git
 
 **连接自己的Github网站：**git remote add origin https://github.com/Megnate/My-first-knowledge-graph-.git      **(一定要记得最后的.git)**
 
+```git
+git remote add origin git@github.com:Megnate/Node.gi
+这个是看github网页中的SSH代码
+```
+
 # 在VS中使用git
 
 ![image-20201216210851619](C:\Users\梅桂楠\AppData\Roaming\Typora\typora-user-images\image-20201216210851619.png)

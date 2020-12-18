@@ -83,6 +83,27 @@ inverse_transform（）：将标准化后的数据转换成原始的数据
 
 split（）：当里面什么都不放的时候，就是按照空格进行分割，返回的是一个列表
 
+
+
+**random**
+在两个数之间随机选择一个：
+
+```python
+import random
+c = [1, 2]
+print(random.random(c))   # 1或2
+```
+
+在一个区间内选择数（闭区间）：
+
+```python
+import random
+random.randint(10, 20)   # 随机选取一个[10,20]之间的整数
+random.random(10, 20)   # 随机选取一个[10,20]之间的数，可以是小数
+```
+
+
+
 # pandas
 
 pandas以字典的方式提取列的值：df['A']，提取的就是A列的值
@@ -209,5 +230,577 @@ def anagram_solution1(s1, s2):
 
 
 anagram_solution1("abcd","dbca")
+```
+
+## 判断括号是否匹配对位
+
+```python
+class Match(object):
+    stack = []  # 建立一个空的栈
+
+    def size(self):
+        return len(self.stack)
+
+    def pop(self):
+        return self.stack.pop()
+
+    def check(self, list1):
+        o = '([{'
+        c = ')]}'
+        while len(list1) != 0:
+            if list1[0] in '([{':
+                self.stack.append(list1[0])
+                del list1[0]
+            if list1[0] in ')]}':
+                if self.size() == 0:
+                    # 如果多一个，那么此时的self.size() == 0，那么避免bug就可以退出循环，因为此时len(list1) != 0
+                    break
+                else:
+                    # stack中还存在，代表还可以匹配，所以就从top移除它，并减少list存放
+                    opens = self.stack.pop()
+                    closes = list1[0]
+                    if o.index(opens) != c.index(closes):
+                        # 确保要删除的两项在这两个列表中的索引位置是相同的，因为这两个列表中的值是一一对应的
+                        # 索引值不同，就代表肯定不是一对括号，所以就跳出循环，匹配失败
+                        break
+                    del list1[0]
+        if self.size() == 0 and len(list1) == 0:
+            print('匹配成功')
+        else:
+            print('匹配失败')
+
+
+k = '()([})'
+list2 = list(k)   # 将括号放在列表中，便于取出和删除
+print(list2)
+a = Match()
+a.check(list2)
+```
+
+## 传土豆问题
+
+```python
+'''
+创建一个队列
+'''
+class Queue():
+    def __init__(self):
+        self.items = []
+
+    def enqueue(self, item):
+        # 将List集合的首端作为队列的末端
+        self.items.insert(0, item)
+
+    def dequeue(self):
+        # 将List集合的末端作为队列的首端
+        return self.items.pop()
+
+    def isEmpty(self):
+        # 空集合返回True
+        return self.items == []
+
+    def size(self):
+        return len(self.items)
+
+
+def potato(name_list, num):
+    queue = Queue()
+    for n in name_list:
+        queue.enqueue(n)
+    while queue.size() > 1:
+        # 一个for循环就是一次传递，传递了num次，假设从首端开始传递
+        for n in range(num):
+            queue.enqueue(queue.dequeue())
+        # 传递完成，此时在首端的人就出局
+        queue.dequeue()
+    # 当人数只有一个时，把该人的名字返回出去
+    return queue.dequeue()
+
+
+name = ['Bell', 'Brad', 'Kent', 'Jane', 'Susan', 'David', 'Rose']
+print(potato(name, len(name)))
+```
+
+## 打印任务
+
+```python
+import random
+
+
+class Queue():
+    def __init__(self):
+        self.items = []
+
+    def enqueue(self, item):
+        # 将List集合的首端作为队列的末端
+        self.items.insert(0, item)
+
+    def dequeue(self):
+        # 将List集合的末端作为队列的首端
+        return self.items.pop()
+
+    def isEmpty(self):
+        # 空集合返回True
+        return self.items == []
+
+    def size(self):
+        return len(self.items)
+
+
+name = ['Bell', 'Brad', 'Kent', 'Jane', 'Susan', 'David', 'Rose', 'Meg', 'Miz', 'Ken']
+
+
+# 首先全使用草稿模式来进行打印，每分钟10页
+# 在这一小时内有10个人要打印
+def print_c(name_list, time):
+    q = Queue()
+    for i in name_list:
+        q.enqueue(i)
+    # 总共循环两次，表示每个人都打印两次
+    print('----------first---------')
+    for n in range(len(name_list)):
+        print_num = random.randint(10, 20)
+        time = time + 6 * print_num
+        q.enqueue(q.dequeue())
+    print(time/60)
+    print('----------second--------')
+    for n in range(len(name_list)):
+        print_num = random.randint(10, 20)
+        time = time + 6 * print_num
+        q.enqueue(q.dequeue())
+    print(time/60)
+
+
+# 使用正常模式打印，质量好，每分钟5页
+def print_n(name_list, time):
+    q = Queue()
+    for i in name_list:
+        q.enqueue(i)
+    # 总共循环两次，表示每个人都打印两次
+    print('----------first---------')
+    for n in range(len(name_list)):
+        print_num = random.randint(10, 20)
+        time = time + 12 * print_num
+        q.enqueue(q.dequeue())
+    print(time / 60)
+    print('----------second--------')
+    for n in range(len(name_list)):
+        print_num = random.randint(10, 20)
+        time = time + 12 * print_num
+        q.enqueue(q.dequeue())
+    print(time / 60)
+
+
+# 混合使用
+def print_l(name_list, time):
+    # 统计两种模式出现的次数
+    num_6 = 0
+    num_12 = 0
+    q = Queue()
+    for i in name_list:
+        q.enqueue(i)
+    # 表示在6和12之间选一个
+    x = [6, 12]
+
+    # 第一轮就算全部都选用正常模式也不会超过一小时，所以默认全部选取正常模式
+    for n in range(len(name_list)):
+        print_num = random.randint(10, 20)
+        time = time + 12 * print_num
+        q.enqueue(q.dequeue())
+
+    for n in range(len(name_list)):
+        print_num = random.randint(10, 20)
+        times = random.choice(x)
+        time = time + times * print_num
+        if times == 6:
+            num_6 += 1
+        else:
+            num_12 += 1
+        q.enqueue(q.dequeue())
+    return time, num_6, num_12
+
+
+i = 0
+results = {}
+key = []
+while i < 10:
+    result = print_l(name, 0)
+    if result[0] <= 3600 and result[2] >= result[1]:
+        results[result[0]] = result[2]
+        i += 1
+    else:
+        i += 1
+key = results.keys()
+max_result = max(key)
+print(max_result)
+print(results[max_result])
+```
+
+## 回问词判定
+
+```python
+class Deque:
+    def __init__(self):
+        self.items = []
+
+    def isEmpty(self):
+        return self.items == []
+
+    def addFront(self, item):
+        self.items.append(item)
+
+    def addRear(self, item):
+        self.items.insert(0, item)
+
+    def removeFront(self):
+        return self.items.pop()
+
+    def removeRear(self):
+        return self.items.pop(0)
+
+    def size(self):
+        return len(self.items)
+
+
+def ban(str_train):
+    d1 = Deque()
+    d2 = Deque()
+    for i in str_train:
+        d1.addRear(i)
+        d2.addFront(i)
+    match = True
+    for i in range(len(str_train) - 1):
+        if d1.removeRear() == d2.removeRear():
+            match = True
+        else:
+            print('error')
+            match = False
+            break
+    return match
+
+
+str_test = '上海自来水来自海上'
+list_str = list(str_test)
+print(ban(str_test))
+```
+
+
+
+# 基本数据结构
+
+以下的四种大致上是一样的，只是数据项之间存在着先后的次序，但是都是线性结构
+
+## 栈（stack）
+
+**有次序**的数据项**集合**，数据项的加入或者移除都只会发生在同一端（顶top，底base）
+距离**base**越近的，留在数据集合中最久，首先移除的是top
+**后进先出**，在**java**中栈内存就是这么存放数据的，所以在栈中存放时间越久，那么离base越近，存放时间越短，离top越近
+
+进栈和出栈的顺序是反过来的：在浏览器中的**后退**也是如此
+
+### ==代码操作==
+
+```python
+Stack()   # 创建一个空栈，不包含任何的数据项
+push(item)    # 将itrm加入栈顶，无返回值
+pop()   # 将栈顶数据移除，并返回，栈被修改
+peek()  # 返回栈顶的数据项，对栈不进行操作
+isEmpty()   # 返回栈是否是空栈
+size()   # 返回栈中数据项的数目
+
+
+s = Stack()       # []  空的栈
+s.isEmpty()         # True
+s.push(4)        # [4]
+s.push('dog')       # [4, 'dog']
+s.peek()         # 'dog'
+s.push(True)     # [4, 'dog', True]
+s.size()     # 3
+s.pop()       # [4, 'dog']
+s.size()        # 2
+```
+
+### **python 实现**
+
+将Stack做成python中的一个**Class**，然后将其操作做成class中的**方法**，stack是一个数据集，所以可以采用python的原生数据集（list，dict）
+
+可以选用List数据集，将**index=0**一端作为**base**，将**index=-1**一段作为**top**，这样List的**append，pop**就可以实现栈顶输入输出的功能
+
+```python
+class Stack():
+    def __init(self):
+        self.items = []
+    def isEmpty(self):
+		return self.items == []
+    def push(self, item):
+		self.items.append(item)
+    def pop(self):
+        return self.items.pop()
+    def peek(self)
+    	return self.items[len(self.items.size() - 1)]
+    def size(self):
+        return len(self.items)
+```
+
+```python
+# 在列表中插入某一项，这个可以作为index=0作为top的class来用
+def push(self, item):
+    self.items.insert(0, item)
+def pop(self):
+	return self.items.pop(0)
+```
+
+## 队列（Queue）
+
+**有次序**的数据**集合**，新数据项的添加总是发生在一端（通常在**尾端rear**），现存数据项的移除通常在**首端front**
+
+==*==  当数据项加入队列时，首先出现在队尾，随着队首数据项的移除，再逐渐靠近队首，**先进先出**
+
+==打印队列==、==进程调度==、==键盘缓冲==
+
+```python
+Queue()   # 创建一个空的队列对象，返回值是Queue对象
+enqueue(item)   # 将数据项item添加至队尾，无返回值
+dequeue()   # 从队首移除数据项，返回值为队首数据项，队列被修改
+isEmpty()   # 判断是否是空队列，返回值是Boolean
+size()      # 返回队列中数据项的个数
+
+class Queue():
+    def __init__(self):
+        self.items = []
+
+    def enqueue(self, item):
+        # 将List集合的首端作为队列的末端
+        self.items.insert(0, item)
+        # self.items.append(item)
+
+    def dequeue(self):
+        # 将List集合的末端作为队列的首端
+        return self.items.pop()
+        # return self.items.pop(0)
+
+    def isEmpty(self):
+        # 空集合返回True
+        return self.items == []
+
+    def size(self):
+        return len(self.items)
+```
+
+## 双端队列（Deque）
+
+和队列相似，数据项可以从两端加入或移除，集成了栈和队列的功能，但是并不存在**先入先出**或**先进后出**的功能
+
+```python
+'''
+index=0的作为deque的尾端
+index=-1的作为deque的首端
+'''
+class Deque:
+    def __init__(self):
+        self.items = []
+
+    def isEmpty(self):
+        return self.items == []
+
+    def addFront(self, item):
+        self.items.append(item)
+
+    def addRear(self, item):
+        self.items.insert(0, item)
+
+    def removeFront(self):
+        return self.items.pop()
+
+    def removeRear(self):
+        return self.items.pop(0)
+
+    def size(self):
+        return len(self.items)
+```
+
+
+
+## 列表（List）
+
+### 无序表
+
+数据项按照**相对位置存放**的数据集，仅仅只是按照存放位置来索引，也就是index（下标）
+
+```python
+List()   # 创建一个空的列表
+add(item)   # 添加一个数据项到列表之中
+remove(item)   # 移除一个列表中的数据项
+search(item)   # 在列表中查找item，返回Boolean
+isEmpty()   # 返回列表是否为空
+size()   # 返回列表包含多少个数据项
+append(item)   # 将一个数据项添加到末尾
+index(item)   # 返回数据项在表中的位置，也就是返回其下标索引
+insert(pos, item)   # 将数据项插在index = pos处，且item原先不存在该列表中
+pop()    # 从列表的末尾移除数据项item
+pop(pos)  # 移除index = pos的数据项，并且移除之后整个列表要往前移动
+
+'''
+采用链表的方式来存放列表
+使用单链表的方式，那么按照链表的定义，需要有节点的实现
+节点需要有自身的信息，也需要有下一个节点的信息，所以需要get 和set 方法来获取当前节点和下一个节点的信息
+'''
+class Node:
+    # 创建节点类，用于定义链表中的节点
+    def __init__(self, nodedata):
+        self.node = nodedata
+        self.next = None
+
+    def getNode(self):
+        return self.node
+
+    def getNext(self):
+        return self.next
+
+    def setNode(self, newNode):
+        self.node = newNode
+
+    def setNext(self, newNext):
+        self.next = newNext
+
+
+class Create_list:
+    def __init__(self):
+        self.head = None
+
+    def add(self, item):
+        # 将传入的数据做成一个节点，将这个节点放在头节点，然后将头节点的下一个节点变成新的头节点
+        # 这样就可以一直的在头节点处添加新的节点，对于新加入的数据每一个加入的位置都是头节点的位置
+        # 链表结构如果想访问所有的数据项，就必须从head节点开始，所以最快添加数据的位置就是头列表
+        temp = Node(item)
+        temp.setNext(self.head)
+        self.head = temp
+
+    def remove(self, item):
+        current_node = self.head
+        last_node = None
+        find = False
+        while not find:
+            if current_node.getNode() == item:
+                find = True
+            else:
+                last_node = current_node
+                current_node = current_node.getNext()
+        if last_node == None:
+            self.head = current_node.getNext()
+        else:
+            last_node.setNext(current_node.getNext())
+
+    def search(self, item):
+        current_node = self.head
+        last_node = None
+        find = False
+        # 一旦current_node == None，表示这是一个空链表，那么就会报错，因为Node不会有任何方法
+        while not find and current_node != None:
+            if current_node.getNode() == item:
+                find = True
+            else:
+                last_node = current_node
+                if current_node.getNext() == None:
+                    find = False
+                    break
+                else:
+                    current_node = current_node.getNext()
+        return find
+
+    def isEmpty(self):
+        return self.head == None
+
+    def size(self):
+        current_node = self.head
+        count = 1
+        # 直到current_node.getNext() == None才结束，此时的current_node != None，所以初始count=1
+        while current_node != None:
+            if current_node.getNext() != None:
+                count += 1
+                current_node = current_node.getNext()
+            else:
+                break
+        return count
+```
+
+### 有序表
+
+按照一定的顺序排列的链表
+
+**最后可以加一个打印的代码**
+
+```python
+# 唯一的难点就在于当数据项加入整个链表之后，必须保持这个链表的排序
+class Node:
+    # 创建节点类，用于定义链表中的节点
+    def __init__(self, nodedata):
+        self.node = nodedata
+        self.next = None
+
+    def getNode(self):
+        return self.node
+
+    def getNext(self):
+        return self.next
+
+    def setNode(self, newNode):
+        self.node = newNode
+
+    def setNext(self, newNext):
+        self.next = newNext
+
+
+class OrderList():
+    def __init__(self):
+        self.head = None
+
+    def add(self, item):
+        current = self.head
+        last = None
+        stop = False
+        # 发现插入的位置
+        while current != None and not stop:
+            if current.getNode() > item:
+                stop = True
+            else:
+                last = current
+                current = current.getNext()
+        temp = Node(item)
+        # 插入表头
+        if last == None:
+            temp.setNext(self.head)
+            self.head = temp
+        # 插入末尾
+        else:
+            temp.setNext(current)
+            last.setNext(temp)
+
+    def search(self, item):
+        # 利用有序的特点，可以更快地找到是否存在该数值
+        current = self.head
+        find = False
+        stop = False
+        while current != None and not find and not stop:
+            if current.getNode() == item:
+                find = True
+            else:
+                if current.getNode() > item:
+                    stop = True
+                else:
+                    current = current.getNext()
+        return find
+    
+	# 将这个链表打印出来的代码
+    def print_data(self):
+        a = []
+        current = self.head
+        while current != None:
+            if current != None:
+                a.append(current.getNode())
+                current = current.getNext()
+            else:
+                break
+        return a
 ```
 

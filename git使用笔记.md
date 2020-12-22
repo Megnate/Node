@@ -138,3 +138,27 @@ git remote add origin git@github.com:Megnate/Node.gi
 可以使用**git bash**来操作GitHub，也可以使用VS自带的选择按钮来操作GitHub
 
 在**全部提交**选项处还可以下拉选择**全部提交并推送**
+
+# push或者pull出现错误
+
+进入了一个
+
+Please enter a commit message to explain why this merge is necessary, # especially if it merges an updated upstream into a topic branch. # # Lines starting with ‘#’ will be ignored, and an empty message aborts # the commit.
+
+这样的界面
+
+按字母 **i** 进入insert模式
+
+然后按“**Esc**”
+
+输入   :wq
+
+这个输入你可能看不到，但是可以输入
+
+# GitHub
+
+github上删除文件后与本地同步
+
+抓取并合并远程仓库全部内容`git pull origin master`
+
+再推送本地仓库就可以了`git push origin master`

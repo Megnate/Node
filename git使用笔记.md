@@ -18,6 +18,8 @@
 
 **添加文件：**git add 完整文件名（完整的意思是带后缀）
 
+**添加一个文件夹中的所有文件：**git add .   注意有一个点
+
 **对这一次操作进行注释：**git commit -m '注释的文字内容'
 
 **查看是否有其他文件正在提交：**git status
@@ -95,6 +97,14 @@ git config --global credential.help
 git pull
 
 再输入一遍就可以了
+
+# 出现错误
+
+fatal: 'origin' does not appear to be a git repository fatal: Could not read from remote repository.
+
+git remote add origin  + 库的SSH的名字
+
+然后再提交就可以了
 
 # 最常用的操作
 

@@ -887,14 +887,6 @@ window.onrisize = myChart.resize
 
 
 
-# 电商
-
-在项目文件夹下安装**koa2**：npm init -y(这个命令可以帮助我们快速建立一个packget.json的文件)    npm install koa
-
-这些都可以在**VS Code**的终端中输入命令创建
-
-
-
 
 
 

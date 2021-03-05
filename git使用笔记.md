@@ -2,6 +2,12 @@
 
 在 **git bash**空白处**右键**，选择**Options**，选择**Text**，然后选择locale中的**zh_CN**，编码选择**UTF-8**
 
+# 复制粘贴
+
+复制：`Ctrl + ins`
+
+粘贴：`Shift + ins`
+
 # 创建git仓库并操作
 
 创建新的目录：**mkdir** 目录名

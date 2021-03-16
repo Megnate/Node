@@ -240,3 +240,502 @@ match(n:label_new) return labels(n)
 match(n:) set n.new_property = n.old_property remove n.old_proerty
 ```
 
+# 图谱
+
+```python
+from py2neo import Node, Relationship
+a = Node('Person', name='Alince')
+b = Node('Person', name='Alinc')  # 表示创建一个节点，其标签是Person，有一个name的属性值
+ab = Relationship(a, 'KNOWS', b)  # 这个边得标签是KNOWS
+```
+
+当上诉创建成功后，也可以进行`增，改，查`
+
+因为Node，Relationship都继承了PropertyDict类，所以可以存在很多属性，且类似于字典的形式，可以通过以下方式接着上面的代码进行赋值：
+
+```python
+a['age'] = 21
+b['age'] = 20
+ab['time'] = '2021-03-16'
+print(a,b,ab)
+```
+
+还可以通过`Setdefault`的方式**赋予默认值**：
+
+```python
+a.setdefault('location', '北京')
+print(a)
+>>> (alice:Person {age:20,location:"北京",name:"Alice"})
+```
+
+可以通过`udate()`的方式进行**批量更新**：
+
+```python
+data = {
+    'name': 'Amy',
+    'age': 21
+}
+a.update(data)
+```
+
+## 包含方法
+
+### 节点
+
+- `hash(node) `返回node的ID的哈希值
+- `node[key]` 返回node的属性值，没有此属性就返回None
+- `node[key] = value` 设定node的属性值
+- `del node[key]` 删除属性值，如果不存在此属性报KeyError
+- `len(node) `返回node属性的数量
+- `dict(node) `返回node所有的属性
+- `walk(node)`返回一个生成器且只包含一个node
+- `labels() `返回node的标签的集合
+- `has_label(label)` node是否有这个标签
+- `add_label(label)` 给node添加标签
+- `remove_label(label)` 删除node的标签
+- `clear_labels() `清楚node的所有标签
+- `update_labels(labels)` 添加多个标签，注labels为可迭代的
+  ————————————————
+  版权声明：本文为CSDN博主「悟乙己」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+  原文链接：https://blog.csdn.net/sinat_26917383/article/details/79901207
+
+### 边
+
+- `hash(relationship)` 返回一个关系的hash值
+- `relationship[key] `返回关系的属性值
+- `relationship[key] = value `设定关系的属性值
+- `del relationship[key]` 删除关系的属性值
+- `len(relationship) `返回关系的属性值数目
+- `dict(relationship) `以字典的形式返回关系的所有属性
+- `walk(relationship) `返回一个生成器包含起始node、关系本身、终止node
+- `type() `返回关系type
+  ————————————————
+  版权声明：本文为CSDN博主「悟乙己」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+  原文链接：https://blog.csdn.net/sinat_26917383/article/details/79901207
+
+## 子图
+
+子图的节点和关系不可变：
+
+```python
+from py2neo import Node, Relationship
+ 
+a = Node('Person', name='Alice')
+b = Node('Person', name='Bob')
+r = Relationship(a, 'KNOWS', b)
+s = a | b | r
+print(s)
+>>> ({(alice:Person {name:"Alice"}), (bob:Person {name:"Bob"})}, {(alice)-[:KNOWS]->(bob)})
+
+# 获取所有的Node和Relationship
+print(s.nodes())
+print(s.relationships())
+```
+
+获取两个子图的交集：
+
+```python
+s1 = a | b | r
+s2 = a | b
+print(s1 & s2)
+>>> ({(alice:Person {name:"Alice"}), (bob:Person {name:"Bob"})}, {})
+```
+
+### 方法
+
+```python
+from py2neo import Node, Relationship, size, order
+s = a | b | r
+print(s.keys())
+print(s.labels())
+print(s.nodes())
+print(s.relationships())
+print(s.types())
+print(order(s))
+print(size(s))
+
+>>> frozenset({'name'})
+>>> frozenset({'Person'})
+>>> frozenset({(alice:Person {name:"Alice"}), (bob:Person >>> >>> >>> {name:"Bob"})})
+>>> frozenset({(alice)-[:KNOWS]->(bob)})
+>>> frozenset({'KNOWS'})
+>>> 2
+>>> 1
+```
+
+- `subgraph | other | … `子图的并
+- `subgraph & other & …` 子图的交
+- `subgraph - other - … `子图的差
+- `subgraph ^ other ^ … `子图对称差
+- `subgraph.keys()` 返回子图节点和关系所有属性的集合
+- `subgraph.labels()` 返回节点label的集合
+- `subgraph.nodes() `返回所有节点的集合
+- `subgraph.relationships() `返回所有关系的集合
+- `subgraph.types() `返回所有关系的type的集合
+- `order(subgraph) `返回子图节点的数目
+- `size(subgraph)` 返回子图关系的数目
+  ————————————————
+  版权声明：本文为CSDN博主「悟乙己」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+  原文链接：https://blog.csdn.net/sinat_26917383/article/details/79901207
+
+## Walkable Type
+
+是一个拥有遍历功能的子图，最简单的构造就是将子图合并
+
+```python
+from py2neo import Node, Relationship
+ 
+a = Node('Person', name='Alice')
+b = Node('Person', name='Bob')
+c = Node('Person', name='Mike')
+ab = Relationship(a, "KNOWS", b)
+ac = Relationship(a, "KNOWS", c)
+w = ab + Relationship(b, "LIKES", c) + ac
+print(w)
+>>> (alice)-[:KNOWS]->(bob)-[:LIKES]->(mike)<-[:KNOWS]-(alice)
+```
+
+调用`walk()`方法进行遍历：
+
+```python
+from py2neo import walk
+ 
+for item in walk(w):
+    print(item)
+
+>>> 
+(alice:Person {name:"Alice"})
+(alice)-[:KNOWS]->(bob)
+(bob:Person {name:"Bob"})
+(bob)-[:LIKES]->(mike)
+(mike:Person {name:"Mike"})
+(alice)-[:KNOWS]->(mike)
+(alice:Person {name:"Alice"})
+```
+
+### 方法
+
+```python
+print(w.start_node())
+print(w.end_node())
+print(w.nodes())
+print(w.relationships())
+
+>>> (alice:Person {name:"Alice"})
+>>> (alice:Person {name:"Alice"})
+>>> ((alice:Person {name:"Alice"}), (bob:Person {name:"Bob"}), (mike:Person {name:"Mike"}), (alice:Person {name:"Alice"}))
+>>> ((alice)-[:KNOWS]->(bob), (bob)-[:LIKES]->(mike), (alice)-[:KNOWS]->(mike))
+```
+
+- `walk(walkable)` 转为一个生成器包含节点和关系
+- `start_node()` 返回walk()的起始节点
+- `end_node()` 返回walk()的最后节点
+- `nodes()` 返回walk()所有节点的元组
+- `relationships()` 返回walk()所有关系的元组
+
+## 查询
+
+### 通过`node`的**ID**进行查询：
+
+```python
+graph = Graph()
+# 其中的数字对应的是节点，ID
+# 这个ID不按顺序来的，要注意
+graph.nodes[1234]
+graph.nodes.get(1234)
+```
+
+### 通过`match`的方式：
+
+```python
+# .run/.data查询
+test_graph.data("MATCH (a:Person {name:'You'}) RETURN a")
+>>> [{'a': (c7d1cb9:Person {name:"You"})}]
+list(test_graph.run("MATCH (a:Person {name:'You'}) RETURN a"))
+>>>[('a': (c7d1cb9:Person {name:"You"}))]
+test_graph.run("MATCH (a:Person {name:'You'}) RETURN a").data()
+>>>[{'a': (c7d1cb9:Person {name:"You"})}]
+# 查询关系
+test_graph.run("MATCH (a:Person {name:'You'})-[b:FRIEND]->(c:Person {name:'Johan'}  )   RETURN a,b,c")
+```
+
+其查询结果也可以是`dataform`的形式：
+
+```python
+pd.DataFrame(test_graph.data("MATCH (a:Person {name:'Anna'}) RETURN a"))
+                  a
+0  {'name': 'Anna'}
+1  {'name': 'Anna'}
+2  {'name': 'Anna'}
+3  {'name': 'Anna'}
+```
+
+查询出来的结果是list/dict形式的，不是graph类型的，所以后续的查询时不能够进行的，但是可以标准化一些格式：
+
+```python
+# graph查询
+graph.run("MATCH (n:leafCategory) RETURN n LIMIT 25").data()  # list型
+graph.run("MATCH (n:leafCategory) RETURN n LIMIT 25").to_data_frame()  # dataframe型
+graph.run("MATCH (n:leafCategory) RETURN n LIMIT 25").to_table()  # table
+```
+
+### 通过`find/find_one`的形式：
+
+`find`查找全部，需要传入不定参数`label,property_value,property_key,limit`返回符合条件的生成器
+
+`find_one`只是查找单节点，需要传入不定参数`label,property_value,property_key`，返回符合条件的一个节点
+
+```python
+# 查找全部
+graph=test_graph.find(label='Person')
+for node in graph:
+    print(node)
+>>>(b54ad74:Person {age:18,name:"Johan"})
+(b1d7b9d:Person {name:"Rajesh"})
+(cf7fe65:Person {name:"Anna"})
+(d780197:Person {name:"Julia"})
+# 查找单节点
+test_graph.find_one(label='Person',property_key='name',property_value='You')
+>>> (c7d1cb9:Person {name:"You"})
+```
+
+返回的都是graph的图类型的数据，所以可以继续进行查询
+
+**判断节点是否存在：**`# 该节点是否存在 test_graph.exists(graph.nodes[1234])`
+
+### NodeMatcher
+
+在4中没有这个函数了，变成：`class.py2neo.matching.NodeMatcher(graph)`
+
+```python
+selector = NodeMatcher(test_graph)
+#selector = NodeSelector(test_graph)
+list(selector.match("Person", name="Anna"))
+list(selector.match("Person").where("_.name =~ 'J.*'", "1960 <= _.born < 1970"))
+```
+
+筛选`age == 21的Person  Node`
+
+```python
+from py2neo import Graph, NodeMatcher
+ 
+graph = Graph(password='123456')
+selector = NodeMatcher(graph)
+#selector = NodeSelector(graph)
+persons = selector.match('Person', age=21)
+print(list(persons))
+```
+
+用`where()`进行更复杂的查询
+
+```python
+from py2neo import Graph, NodeSelector
+ 
+graph = Graph(password='123456')
+selector = NodeMatcher(graph)
+persons = selector.match('Person').where('_.name =~ "A.*"')
+print(list(persons))
+```
+
+`order_by`进行排序：
+
+```python
+from py2neo import Graph, NodeSelector
+ 
+graph = Graph(password='123456')
+selector = NodeMatcher(graph)
+persons = selector.match('Person').order_by('_.age')
+print(list(persons))
+```
+
+- `first()`返回单个节点
+- `limit(amount)`返回底部节点的限值条数
+- `skip(amount)`返回顶部节点的限值条数
+- `order_by(*fields)`排序
+- `where(*conditions, **properties)`筛选条件
+
+### match/match_one()查询关系
+
+match 匹配关系
+
+match_one 匹配并返回所有满足条件的唯一条关系
+
+```python
+// 此时start_node为节点
+for rel in test_graph.match(start_node=node3, rel_type="FRIEND"):
+    print(rel.end_node()["name"])
+>>>Johan
+Julia
+Andrew
+
+# match_one
+test_graph.match_one(start_node=node3, rel_type="FRIEND")
+>>> (c7d1cb9)-[:FRIEND]->(b54ad74)
+```
+
+## 重设，更新
+
+push 和set一样：更新添加，
+
+```python
+node = test_graph.find_one(label='Person')
+node['age'] = 18
+test_graph.push(node)
+print(test_graph.find_one(label='Person'))
+>>> (b54ad74:Person {age:18,name:"Johan"})
+```
+
+setdafault() 方法：设置默认值
+
+```python
+a.setdefault('location', '北京')
+print(a)
+>>> (alice:Person {age:20,location:"北京",name:"Alice"})
+```
+
+udate() ：批量更新
+
+```python
+data = {
+    'name': 'Amy',
+    'age': 21
+}
+a.update(data)
+print(a)
+```
+
+## 删除
+
+`delete(subgraph) `删除节点、关系或子图
+`delete_all() `删除数据库所有的节点和关系
+
+```python
+from py2neo import Graph
+ 
+graph = Graph(password='123456')
+node = graph.find_one(label='Person')
+relationship = graph.match_one(rel_type='KNOWS')
+graph.delete(relationship)
+graph.delete(node)
+```
+
+想删除节点就必须删除对应的关系，并且必须先找到这些节点才可以删除
+
+# OGM
+
+Object Graph Mapping  可以实现一个对象和一个Node的关联
+
+```python
+from py2neo.ogm import GraphObject, Property, RelatedTo, RelatedFrom
+
+
+class Movie(GraphObject):
+    __primarykey__ = 'title'
+
+    title = Property()
+    released = Property()
+    actors = RelatedFrom('Person', 'ACTED_IN')
+    directors = RelatedFrom('Person', 'DIRECTED')
+    producers = RelatedFrom('Person', 'PRODUCED')
+
+class Person(GraphObject):
+    __primarykey__ = 'name'
+
+    name = Property()
+    born = Property()
+    acted_in = RelatedTo('Movie')
+    directed = RelatedTo('Movie')
+    produced = RelatedTo('Movie')
+```
+
+然后结合graph查询
+
+```python
+from py2neo import Graph
+from py2neo.ogm import GraphObject, Property
+
+graph = Graph(password='123456')
+
+
+class Person(GraphObject):
+    __primarykey__ = 'name'
+
+    name = Property()
+    age = Property()
+    location = Property()
+
+person = Person.select(graph).where(age=21).first()
+print(person)
+print(person.name)
+print(person.age)
+```
+
+通过动态映射改变node和relationship
+
+```python
+#修改某个node 的属性
+person = Person.select(graph).where(age=21).first()
+print(person.__ogm__.node)
+person.age = 22
+print(person.__ogm__.node)
+graph.push(person)
+
+
+# 移除某一个关联的node
+person = Person.select(graph).where(name='Alice').first()
+target = Person.select(graph).where(name='Durant').first()
+person.knows.remove(target)
+graph.push(person)
+graph.delete(target)
+
+
+# 添加一个关联的node
+from py2neo import Graph
+from py2neo.ogm import GraphObject, Property, RelatedTo
+
+graph = Graph(password='123456')
+
+class Person(GraphObject):
+    __primarykey__ = 'name'
+
+    name = Property()
+    age = Property()
+    location = Property()
+    knows = RelatedTo('Person', 'KNOWS')
+
+person = Person.select(graph).where(age=21).first()
+print(list(person.knows))
+new_person = Person()
+new_person.name = 'Durant'
+new_person.age = 28
+person.knows.add(new_person)
+print(list(person.knows))
+```
+
+此时的数据库还没有更新，需要以下的代码：
+
+```python
+graph.push(person)
+```
+
+## Matcher
+
+```python
+matcher = RelationshipMatcher(g)
+selector = NodeMatcher(g)
+
+>>> from py2neo import Graph, NodeMatcher
+>>> graph = Graph()
+>>> matcher = NodeMatcher(graph)
+>>> matcher.match("Person", name="Keanu Reeves").first()
+(_224:Person {born:1964,name:"Keanu Reeves"})
+
+
+matcher = RelationshipMatcher(graph) 
+result = matcher.match({node1,node2},'know')
+
+print list(result)
+# match可以加入多个node：{node1, node2}
+```
+
+边关系的查询：`class py2neo.matching.RelationshipMatch(graph, nodes=None, r_type=None, conditions=(), order_by=(), skip=None, limit=None)`

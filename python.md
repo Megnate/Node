@@ -170,3 +170,26 @@ else:
 print(fast.__name__)
 ```
 
+### 保存 list 数据
+
+在python中要保存`list数据类型`，保存在 txt 中会损失其原有的结构，所以可以使用以下办法：
+
+```python
+import numpy as np
+# data是原先的需要保存的数据，是list
+
+data = np.array(data)
+np.save('data.npy', data)
+
+
+# 需要读取的时候
+data = np.load('data.npy', allow_pickle=True)
+data = data.tolist()
+```
+
+==Tips：== 如果读取的txt文件是中文名：
+
+```python
+readme = pd.read_csv(‘读我.txt’,sep=’:’,encoding=“utf-8”, engine=‘python’,header=None)
+```
+

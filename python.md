@@ -100,3 +100,73 @@ if __name__=="__main__":
 以上转自http://hi.baidu.com/fenghua1893/item/d1a71d5ac47ffdcfd3e10cd1
 ```
 
+### 装饰器
+
+```python
+class FlaskBother():
+    def __init__(self):
+        self.routes = {}
+    # route_str就是相关的路由，f就是关联的函数
+    def route(self,route_str):
+        def decorator(f):
+            self.routes[route_str] = f
+            return f
+        return decorator
+    # 通过这个函数去访问路由，再通过路由访问关联的函数，如果没有就返回一个错误
+    def server(self, path):
+        # 此时获取的字典中的key就是：'/'，其对应的value函数就是hello（）
+        view_function = self.routes.get(path)
+        if view_function:
+            return view_function()
+        else:
+            raise ValueError('Route "{}" has not been registered'.format(path))
+
+
+app = FlaskBother()
+
+@app.route("/")
+def hello():
+    return "Hello World"
+
+print(app.server('/'))
+```
+
+装饰器就是在一个函数内部定义另一个函数，然后返回一个新的函数
+
+对于函数内部需要有函数名字签名的可能会发生错误，需要用到一个包：functools
+
+```python
+import functools
+import time
+
+
+def metric(fn):
+    @functools.wraps(fn)
+    def test(*args, **kwargs):
+        print('%s executed in %s ms' % (fn.__name__, 10.24))
+        return fn(*args, **kwargs)
+    return test
+
+@metric
+def fast(x, y):
+    time.sleep(0.00012)
+    return x + y
+
+@metric
+def slow(x, y, z):
+    time.sleep(0.1234)
+    return x * y * z
+
+f = fast(11, 22)
+print(f)
+s = slow(11, 22, 33)
+print(s)
+if f != 33:
+    print('测试失败!')
+elif s != 7986:
+    print('测试失败!')
+else:
+    print('ok')
+print(fast.__name__)
+```
+

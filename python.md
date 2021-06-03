@@ -193,3 +193,35 @@ data = data.tolist()
 readme = pd.read_csv(‘读我.txt’,sep=’:’,encoding=“utf-8”, engine=‘python’,header=None)
 ```
 
+### numpy
+
+`shape`：如果输出结果是（4，）表明是数量为4的向量，（3，3）表明是三行三列
+
+`np.asarray(a) 和 np.array(a)`：都是可以创建一个数组，但是如果原本的数据源就是一个数组，那么array相当于是重新开辟了一个内存空间，是copy一个副本，但是 asarray 并不是，所以其产生的数组会随着源数组的改变而发生改变
+
+```python
+a = np.array([1,2,13,4])
+c = np.asarray(a)
+d = np.array(a)
+b = np.array([2,3])
+a[1] = 3
+print(c)
+print(d)
+
+[ 1  3 13  4]
+[ 1  2 13  4]
+```
+
+
+
+`np.ravel()  np.flatten()`：这两都可以把多维数组变成一维数组，其中第一个发生了改变会对应到数组中，第二个是复制，改变不会回到数组
+
+`np.argsort()`：将数组中的数组按照从小到大的顺序排列，其中的数值为其对应的 index值
+	`np.argsort(a, axis=-1, kind=None, order=None)`，在给定轴进行排序，默认就是x轴
+	kind : {'quicksort', 'mergesort', 'heapsort', 'stable'}  表明排序算法，默认是快速排序
+		合并排序：`mergesort`，其思想是将一个大数组分成 left 和 right 两部分，这两部分其中再进行排序，最后合并就好，直至分解成数组的最小单元 length = 1
+		快速排序：`quicksort`，首先找到一个基准数，将小于这个基准数的数据放在左边，大于这个基准数的数放在右边，这样就可以得到两个数组，重复进行，这样形成的自然数必然是排序好的
+
+`np.c_[a,b]`：按行连接两个矩阵 ，把两个矩阵左右相加，要求行数相等（相加的意思只是放在一起，并不是说要数值相加）
+
+`np.r_[a,b]`：按列连接两个矩阵，把两个矩阵上下相加，要求列数相等
